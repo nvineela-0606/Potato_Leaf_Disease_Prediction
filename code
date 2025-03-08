@@ -1,0 +1,205 @@
+
+print("Hello")
+Hello
+import tensorflow as tf
+import matplotlib.pyplot as plt
+import os
+print("Current Working Directory:", os.getcwd())
+current_directory = os.getcwd()
+train_path = os.path.join(current_directory, "datasets","Train")
+valid_path = os.path.join(current_directory, "datasets","Valid")
+test_path = os.path.join(current_directory, "datasets","Test")
+Current Working Directory: c:\Users\bhara\OneDrive\Desktop\AICTE_PROJECT
+# function is used to create an image dataset from a directory structure where images are organized into subdirectories representing class labels
+training_set = tf.keras.utils.image_dataset_from_directory(
+    train_path,
+    labels="inferred",
+    label_mode="categorical",
+    class_names=None,
+    color_mode="rgb",
+    # batch_size=32,
+    image_size=(128, 128),
+    shuffle=True,
+    # seed=None,
+    # validation_split=None,
+    # subset=None,
+    interpolation="bilinear",
+    # follow_links=False,
+    # crop_to_aspect_ratio=False
+)
+Found 900 files belonging to 3 classes.
+training_set.class_names
+['Potato___Early_blight', 'Potato___Late_blight', 'Potato___healthy']
+validation_set = tf.keras.utils.image_dataset_from_directory(
+    valid_path,
+    labels="inferred",
+    label_mode="categorical",
+    class_names=None,
+    color_mode="rgb",
+    # batch_size=32,
+    image_size=(128, 128),
+    shuffle=True,
+    # seed=None,
+    # validation_split=None,
+    # subset=None,
+    interpolation="bilinear",
+    # follow_links=False,
+    # crop_to_aspect_ratio=False
+)
+Found 300 files belonging to 3 classes.
+validation_set.class_names
+['Potato___Early_blight', 'Potato___Late_blight', 'Potato___healthy']
+cnn = tf.keras.models.Sequential()
+
+cnn.add(tf.keras.layers.Conv2D(filters=32,kernel_size=3,padding='same',activation='relu',input_shape=[128,128,3]))
+cnn.add(tf.keras.layers.Conv2D(filters=32,kernel_size=3,activation='relu'))
+cnn.add(tf.keras.layers.MaxPool2D(pool_size=2,strides=2))
+
+cnn.add(tf.keras.layers.Conv2D(filters=64,kernel_size=3,padding='same',activation='relu'))
+cnn.add(tf.keras.layers.Conv2D(filters=64,kernel_size=3,activation='relu'))
+cnn.add(tf.keras.layers.MaxPool2D(pool_size=2,strides=2))
+
+cnn.add(tf.keras.layers.Conv2D(filters=128,kernel_size=3,padding='same',activation='relu',input_shape=[128,128,3]))
+cnn.add(tf.keras.layers.Conv2D(filters=128,kernel_size=3,activation='relu'))
+cnn.add(tf.keras.layers.MaxPool2D(pool_size=2,strides=2))
+
+cnn.add(tf.keras.layers.Conv2D(filters=256,kernel_size=3,padding='same',activation='relu'))
+cnn.add(tf.keras.layers.Conv2D(filters=256,kernel_size=3,activation='relu'))
+cnn.add(tf.keras.layers.MaxPool2D(pool_size=2,strides=2))
+
+cnn.add(tf.keras.layers.Conv2D(filters=512,kernel_size=3,padding='same',activation='relu'))
+cnn.add(tf.keras.layers.Conv2D(filters=512,kernel_size=3,activation='relu'))
+cnn.add(tf.keras.layers.MaxPool2D(pool_size=2,strides=2))
+
+cnn.add(tf.keras.layers.Dropout(0.25))
+
+cnn.add(tf.keras.layers.Flatten())
+cnn.add(tf.keras.layers.Dense(units=1500,activation='relu'))
+cnn.add(tf.keras.layers.Dropout(0.4))
+
+cnn.add(tf.keras.layers.Dense(units=3,activation='softmax'))
+c:\Users\bhara\AppData\Local\Programs\Python\Python311\Lib\site-packages\keras\src\layers\convolutional\base_conv.py:107: UserWarning: Do not pass an `input_shape`/`input_dim` argument to a layer. When using Sequential models, prefer using an `Input(shape)` object as the first layer in the model instead.
+  super().__init__(activity_regularizer=activity_regularizer, **kwargs)
+cnn.compile(optimizer=tf.keras.optimizers.Adam(
+    learning_rate=0.0001),
+    loss='categorical_crossentropy',
+    metrics=['accuracy'])
+cnn.summary()
+Model: "sequential"
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃ Layer (type)                    ┃ Output Shape           ┃       Param # ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ conv2d (Conv2D)                 │ (None, 128, 128, 32)   │           896 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ conv2d_1 (Conv2D)               │ (None, 126, 126, 32)   │         9,248 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ max_pooling2d (MaxPooling2D)    │ (None, 63, 63, 32)     │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ conv2d_2 (Conv2D)               │ (None, 63, 63, 64)     │        18,496 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ conv2d_3 (Conv2D)               │ (None, 61, 61, 64)     │        36,928 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ max_pooling2d_1 (MaxPooling2D)  │ (None, 30, 30, 64)     │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ conv2d_4 (Conv2D)               │ (None, 30, 30, 128)    │        73,856 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ conv2d_5 (Conv2D)               │ (None, 28, 28, 128)    │       147,584 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ max_pooling2d_2 (MaxPooling2D)  │ (None, 14, 14, 128)    │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ conv2d_6 (Conv2D)               │ (None, 14, 14, 256)    │       295,168 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ conv2d_7 (Conv2D)               │ (None, 12, 12, 256)    │       590,080 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ max_pooling2d_3 (MaxPooling2D)  │ (None, 6, 6, 256)      │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ conv2d_8 (Conv2D)               │ (None, 6, 6, 512)      │     1,180,160 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ conv2d_9 (Conv2D)               │ (None, 4, 4, 512)      │     2,359,808 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ max_pooling2d_4 (MaxPooling2D)  │ (None, 2, 2, 512)      │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dropout (Dropout)               │ (None, 2, 2, 512)      │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ flatten (Flatten)               │ (None, 2048)           │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dense (Dense)                   │ (None, 1500)           │     3,073,500 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dropout_1 (Dropout)             │ (None, 1500)           │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dense_1 (Dense)                 │ (None, 3)              │         4,503 │
+└─────────────────────────────────┴────────────────────────┴───────────────┘
+ Total params: 7,790,227 (29.72 MB)
+ Trainable params: 7,790,227 (29.72 MB)
+ Non-trainable params: 0 (0.00 B)
+training_history = cnn.fit(x=training_set,validation_data=validation_set,epochs=10)
+Epoch 1/10
+29/29 ━━━━━━━━━━━━━━━━━━━━ 18s 466ms/step - accuracy: 0.3793 - loss: 1.4566 - val_accuracy: 0.6233 - val_loss: 0.7954
+Epoch 2/10
+29/29 ━━━━━━━━━━━━━━━━━━━━ 13s 463ms/step - accuracy: 0.6239 - loss: 0.7285 - val_accuracy: 0.8167 - val_loss: 0.4441
+Epoch 3/10
+29/29 ━━━━━━━━━━━━━━━━━━━━ 25s 886ms/step - accuracy: 0.8001 - loss: 0.4484 - val_accuracy: 0.8633 - val_loss: 0.2886
+Epoch 4/10
+29/29 ━━━━━━━━━━━━━━━━━━━━ 28s 968ms/step - accuracy: 0.9004 - loss: 0.2575 - val_accuracy: 0.8167 - val_loss: 0.4190
+Epoch 5/10
+29/29 ━━━━━━━━━━━━━━━━━━━━ 27s 945ms/step - accuracy: 0.8922 - loss: 0.2898 - val_accuracy: 0.8933 - val_loss: 0.2604
+Epoch 6/10
+29/29 ━━━━━━━━━━━━━━━━━━━━ 27s 944ms/step - accuracy: 0.8851 - loss: 0.3490 - val_accuracy: 0.9233 - val_loss: 0.2078
+Epoch 7/10
+29/29 ━━━━━━━━━━━━━━━━━━━━ 27s 932ms/step - accuracy: 0.9379 - loss: 0.1802 - val_accuracy: 0.9467 - val_loss: 0.1554
+Epoch 8/10
+29/29 ━━━━━━━━━━━━━━━━━━━━ 27s 928ms/step - accuracy: 0.9657 - loss: 0.0787 - val_accuracy: 0.9100 - val_loss: 0.2725
+Epoch 9/10
+29/29 ━━━━━━━━━━━━━━━━━━━━ 27s 948ms/step - accuracy: 0.9627 - loss: 0.1160 - val_accuracy: 0.9467 - val_loss: 0.1287
+Epoch 10/10
+29/29 ━━━━━━━━━━━━━━━━━━━━ 27s 939ms/step - accuracy: 0.9672 - loss: 0.0930 - val_accuracy: 0.9533 - val_loss: 0.1215
+train_loss, train_acc = cnn.evaluate(training_set)
+print('Training accuracy:', train_acc)
+29/29 ━━━━━━━━━━━━━━━━━━━━ 6s 210ms/step - accuracy: 0.9856 - loss: 0.0447
+Training accuracy: 0.9844444394111633
+val_loss,val_acc= cnn.evaluate(validation_set)
+print("Validation accuracy",val_acc )
+10/10 ━━━━━━━━━━━━━━━━━━━━ 2s 184ms/step - accuracy: 0.9506 - loss: 0.1184
+Validation accuracy 0.95333331823349
+cnn.save('trained_plant_disease_model.keras')
+training_history.history
+{'accuracy': [0.45444443821907043,
+  0.6899999976158142,
+  0.8322222232818604,
+  0.9144444465637207,
+  0.903333306312561,
+  0.9055555462837219,
+  0.945555567741394,
+  0.9711111187934875,
+  0.9655555486679077,
+  0.9555555582046509],
+ 'loss': [1.190804123878479,
+  0.643097996711731,
+  0.3981485068798065,
+  0.22817131876945496,
+  0.2704456150531769,
+  0.2746036648750305,
+  0.14329980313777924,
+  0.07651059329509735,
+  0.10759025812149048,
+  0.13713301718235016],
+ 'val_accuracy': [0.6233333349227905,
+  0.8166666626930237,
+  0.8633333444595337,
+  0.8166666626930237,
+  0.8933333158493042,
+  0.9233333468437195,
+  0.9466666579246521,
+  0.9100000262260437,
+  0.9466666579246521,
+  0.95333331823349],
+ 'val_loss': [0.79537433385849,
+  0.4440876245498657,
+  0.2885628342628479,
+  0.41898584365844727,
+  0.2603778541088104,
+  0.2077745497226715,
+  0.1553557813167572,
+  0.27245914936065674,
+  0.12870052456855774,
+  0.12152180820703506]}
